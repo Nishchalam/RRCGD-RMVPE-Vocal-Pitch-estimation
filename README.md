@@ -148,11 +148,23 @@ configs/
   experiments_clean_noisy_512bins_bs8.yaml   # clean+noisy, 512 bins
 ```
 
-## Reference
+## References
 
-Singh, N., Batra, M., & Ramalingam, C. S. "Improved Pitch and Voicing
-Determination Using the Reflected Root Chirp Group Delay Spectrum."
-ICASSP 2025. DOI: 10.1109/ICASSP49660.2025.10890591.
+1. Singh, N., Batra, M., & Ramalingam, C. S. "Improved Pitch and Voicing
+   Determination Using the Reflected Root Chirp Group Delay Spectrum."
+   ICASSP 2025. DOI: 10.1109/ICASSP49660.2025.10890591. — source of the
+   RRCGD feature this project builds on.
+2. Wei, H., Cao, X., Dan, T., & Chen, Y. "RMVPE: A Robust Model for
+   Vocal Pitch Estimation in Polyphonic Music." Interspeech 2023.
+   arXiv:2306.15412. — source of the RMVPE architecture
+   (`src/model.py`, `src/deepunet.py`) this project feeds RRCGD into,
+   in place of RMVPE's native mel-spectrogram input.
+3. Lindsey, J. P., & Fox, J. W. The Lindsey-Fox polynomial root finder
+   (WebLF21), Rice University DSP group. Not a formal publication —
+   a MATLAB toolbox distributed on the Rice DSP group's site; used
+   here (patched for portability, see
+   [data_pipeline/4_roots_matlab](data_pipeline/4_roots_matlab/)) for
+   the polynomial root extraction RRCGD is computed from.
 
 ## License
 
