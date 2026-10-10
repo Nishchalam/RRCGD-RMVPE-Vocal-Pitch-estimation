@@ -1,0 +1,9 @@
+addpath('/home/csb/matlab');
+addpath('/home/csb/matlab/poly');
+addpath('/home/csb/matlab/LF2');
+addpath('/home/csb/matlab/LF2/shared');
+addpath('/home/csb/matlab/LF2/mexFiles');
+addpath('/home/csb/matlab/LF2/lroots');
+addpath('/home/csb/matlab/LF2/multroot');
+addpath('/home/csb/matlab/LF2/multroot/multroot');
+addpath('/home/csb/matlab/LF2/help');

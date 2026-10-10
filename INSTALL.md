@@ -46,8 +46,8 @@ imports.
 
 ```bash
 # 1. Create the Python environment
-conda env create -f environment.yml -n rrcgd_rmvpe
-conda activate rrcgd_rmvpe
+conda env create -f environment.yml -n gd_exps
+conda activate gd_exps
 
 # 2. Install torch/torchaudio/torchvision from PyTorch's own CUDA wheel
 #    index -- NOT plain PyPI/conda-forge, which can silently give you a

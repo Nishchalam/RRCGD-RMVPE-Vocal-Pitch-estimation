@@ -1,0 +1,10 @@
+addpath('c:\poly');
+addpath('c:\program files\matlab71\work');
+addpath('c:\program files\matlab71\work\WebLF21');
+addpath('c:\program files\matlab71\work\WebLF21\shared');
+addpath('c:\program files\matlab71\work\WebLF21\mexFiles');
+addpath('c:\program files\matlab71\work\WebLF21\lroots');
+addpath('c:\program files\matlab71\work\WebLF21\broots');
+addpath('c:\program files\matlab71\work\WebLF21\help');
+addpath('c:\program files\matlab71\work\WebLF21\multroot');
+addpath('c:\program files\matlab71\work\WebLF21\multroot\multroot');

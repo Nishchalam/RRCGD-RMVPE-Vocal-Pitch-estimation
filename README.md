@@ -114,11 +114,19 @@ python3 compile_best_results.py
 ```
 
 Full setup, data layout, and reproducibility notes:
-[INSTALL.md](INSTALL.md).
+[INSTALL.md](INSTALL.md). For the complete pipeline starting from
+nothing — downloading PTDB-TUG, building the speaker-disjoint split,
+generating noisy data, and extracting roots in MATLAB — see
+[data_pipeline/](data_pipeline/).
 
 ## Repository layout
 
 ```
+data_pipeline/                # steps 1-4: raw audio -> trained-model-ready data (see data_pipeline/README.md)
+  1_download/                   # PTDB-TUG download + environment setup
+  2_split/                       # speaker-disjoint train/valid/test split
+  3_augment/                     # SNR-augmented noisy data (for clean+noisy training)
+  4_roots_matlab/                 # polynomial root extraction (MATLAB, Lindsey-Fox toolbox)
 run_experiments.py           # orchestrates one run per (experiment, alpha) in a config
 train_single.py               # single training run; reads EXP_* env vars run_experiments.py sets
 evaluate.py                   # generic evaluation entry point
