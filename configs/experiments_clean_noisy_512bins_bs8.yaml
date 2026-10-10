@@ -1,0 +1,143 @@
+# PTDB clean+noisy training, N_Bins=512, batch_size=8, 32ms window (2026-09-25).
+# Derived from experiments_256bins_bs8.yaml: datatype=clean_noisy, clean_only=false.
+# Job names carry '_clean_noisy_' and '_512bs8' so shared-log entries never collide.
+
+defaults:
+  learning_rate: 0.001
+  batch_size: 8
+  seq_l: 2.55
+  hop_length: 10
+  clip_grad_norm: 3
+  gamma: 0
+  pitch_th: 0.5
+  sample_rate: 8000
+  n_bins: 512
+  use_cache: true
+  seed: 42
+  deterministic: true
+  eval_test: true
+  alpha_list:
+  - 20
+  - 19.5
+  - 19
+  - 18.5
+  - 18
+  - 17.5
+  - 17
+  - 16.5
+  - 16
+  - 15.5
+  - 15
+  - 14.5
+  - 14
+  - 13.5
+  - 13
+  - 12.5
+  - 12
+  - 11.5
+  - 11
+  - 10.5
+  - 10
+  - 9.5
+  - 9
+data_paths:
+  ptdb: dataset/PTDB_data_10ms_hop
+experiments:
+- name: ptdb_10ms_clean_noisy_linear_fs2_512bs8
+  dataset: ptdb
+  datatype: clean_noisy
+  sample_rate: 8000
+  train_splits:
+  - train
+  valid_splits:
+  - valid
+  f_max: fs/2
+  window_length: 256
+  n_bins: 512
+  bin_method: linear_fmax
+  clean_only: false
+  use_cache: true
+- name: ptdb_10ms_clean_noisy_mel_fs2_512bs8
+  dataset: ptdb
+  datatype: clean_noisy
+  sample_rate: 8000
+  train_splits:
+  - train
+  valid_splits:
+  - valid
+  f_max: fs/2
+  window_length: 256
+  n_bins: 512
+  bin_method: mel_aligned
+  clean_only: false
+  use_cache: true
+- name: ptdb_10ms_clean_noisy_linear_fs4_512bs8
+  dataset: ptdb
+  datatype: clean_noisy
+  sample_rate: 8000
+  train_splits:
+  - train
+  valid_splits:
+  - valid
+  f_max: fs/4
+  window_length: 256
+  n_bins: 512
+  bin_method: linear_fmax
+  clean_only: false
+  use_cache: true
+- name: ptdb_10ms_clean_noisy_mel_fs4_512bs8
+  dataset: ptdb
+  datatype: clean_noisy
+  sample_rate: 8000
+  train_splits:
+  - train
+  valid_splits:
+  - valid
+  f_max: fs/4
+  window_length: 256
+  n_bins: 512
+  bin_method: mel_aligned
+  clean_only: false
+  use_cache: true
+- name: ptdb_10ms_clean_noisy_linear_upper_frequency_fs4_512bs8
+  dataset: ptdb
+  datatype: clean_noisy
+  sample_rate: 8000
+  train_splits:
+  - train
+  valid_splits:
+  - valid
+  f_max: fs/4
+  window_length: 256
+  n_bins: 512
+  bin_method: linear_fmax_upper_frequency_truncated
+  clean_only: false
+  use_cache: true
+- name: ptdb_10ms_clean_noisy_mel_upper_frequency_fs4_512bs8
+  dataset: ptdb
+  datatype: clean_noisy
+  sample_rate: 8000
+  train_splits:
+  - train
+  valid_splits:
+  - valid
+  f_max: fs/4
+  window_length: 256
+  n_bins: 512
+  bin_method: mel_aligned_upper_frequency_truncated
+  clean_only: false
+  use_cache: true
+- name: ptdb_10ms_clean_noisy_mel_upper_bins_fs4_512bs8
+  dataset: ptdb
+  datatype: clean_noisy
+  sample_rate: 8000
+  train_splits:
+  - train
+  valid_splits:
+  - valid
+  f_max: fs/4
+  window_length: 256
+  n_bins: 512
+  bin_method: mel_aligned_upper_bins_truncated
+  clean_only: false
+  use_cache: true

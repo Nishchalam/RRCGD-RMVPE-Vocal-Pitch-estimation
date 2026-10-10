@@ -1,0 +1,20 @@
+# Conda environment spec for RRCGD-RMVPE.
+#
+# Usage:
+#   conda env create -f environment.yml -n gd_exps
+#   conda activate gd_exps
+#   pip install torch==2.10.0 torchaudio==2.10.0 torchvision==0.25.0 \
+#       --index-url https://download.pytorch.org/whl/cu128
+#   pip install -r requirements.txt
+#
+# torch is intentionally NOT listed here as a conda/pip dependency --
+# its +cu128 build must come from PyTorch's own wheel index (see
+# INSTALL.md step 2), not plain PyPI/conda-forge, or you'll silently get
+# a CPU-only or wrong-CUDA-version build. This file only pins the
+# Python interpreter itself; everything else comes from requirements.txt.
+name: gd_exps
+channels:
+  - defaults
+dependencies:
+  - python=3.10.18
+  - pip

@@ -1,0 +1,14 @@
+# Everything except torch/torchaudio/torchvision, which come from
+# PyTorch's own CUDA wheel index -- see INSTALL.md step 2. Installing
+# them from plain PyPI/conda-forge can silently give you a CPU-only or
+# mismatched-CUDA build with the same version string.
+numpy==2.2.6
+scipy==1.15.3
+pandas==2.3.3
+PyYAML==6.0.2
+librosa==0.11.0
+soundfile==0.13.1
+mir_eval==0.7
+tqdm==4.67.0
+matplotlib==3.10.8
+tensorboard==2.20.0

@@ -1,0 +1,117 @@
+# PTDB batch-size matrix: N_Bins=256, batch_size=8.
+# Generated 2026-09-19 as part of filling out the full (256/512 bins) x
+# (8/16/32 batch_size) matrix -- see README.md's 256-bin confound note for
+# why this matrix exists (the live 256-bin sweep accidentally ran at bs=32
+# instead of the finalized bs=8). Job names are suffixed '_256bs8' so this
+# sweep's log entries in experiment_run_paper_linear.log never collide with
+# any other config's identically-named jobs (rules.md Sec.3) -- this matters
+# more than usual here since up to 4 batch-size variants may run concurrently.
+# batch_size is baked into the run-directory path (logdir_for()), so this
+# writes to its own tree regardless of job-name choice; the suffix is purely
+# for log legibility.
+
+defaults:
+  learning_rate: 0.001
+  batch_size: 8
+  seq_l: 2.55
+  hop_length: 10
+  clip_grad_norm: 3
+  gamma: 0
+  pitch_th: 0.5
+  sample_rate: 8000
+  n_bins: 256
+  use_cache: true
+  seed: 42
+  deterministic: true
+  eval_test: true
+  alpha_list: [9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5,
+    18, 18.5, 19, 19.5, 20]
+data_paths: {ptdb: dataset/PTDB_data_10ms_hop}
+experiments:
+- name: ptdb_10ms_clean_linear_fs2_256bs8
+  dataset: ptdb
+  datatype: clean
+  sample_rate: 8000
+  train_splits: [train]
+  valid_splits: [valid]
+  f_max: fs/2
+  window_length: 256
+  n_bins: 256
+  bin_method: linear_fmax
+  clean_only: true
+  use_cache: true
+- name: ptdb_10ms_clean_mel_fs2_256bs8
+  dataset: ptdb
+  datatype: clean
+  sample_rate: 8000
+  train_splits: [train]
+  valid_splits: [valid]
+  f_max: fs/2
+  window_length: 256
+  n_bins: 256
+  bin_method: mel_aligned
+  clean_only: true
+  use_cache: true
+- name: ptdb_10ms_clean_linear_fs4_256bs8
+  dataset: ptdb
+  datatype: clean
+  sample_rate: 8000
+  train_splits: [train]
+  valid_splits: [valid]
+  f_max: fs/4
+  window_length: 256
+  n_bins: 256
+  bin_method: linear_fmax
+  clean_only: true
+  use_cache: true
+- name: ptdb_10ms_clean_mel_fs4_256bs8
+  dataset: ptdb
+  datatype: clean
+  sample_rate: 8000
+  train_splits: [train]
+  valid_splits: [valid]
+  f_max: fs/4
+  window_length: 256
+  n_bins: 256
+  bin_method: mel_aligned
+  clean_only: true
+  use_cache: true
+- name: ptdb_10ms_clean_linear_upper_frequency_fs4_256bs8
+  dataset: ptdb
+  datatype: clean
+  sample_rate: 8000
+  train_splits: [train]
+  valid_splits: [valid]
+  f_max: fs/4
+  window_length: 256
+  n_bins: 256
+  bin_method: linear_fmax_upper_frequency_truncated
+  clean_only: true
+  use_cache: true
+- name: ptdb_10ms_clean_mel_upper_frequency_fs4_256bs8
+  dataset: ptdb
+  datatype: clean
+  sample_rate: 8000
+  train_splits: [train]
+  valid_splits: [valid]
+  f_max: fs/4
+  window_length: 256
+  n_bins: 256
+  bin_method: mel_aligned_upper_frequency_truncated
+  clean_only: true
+  use_cache: true
+# ptdb_10ms_clean_linear_upper_bins_fs4_* (E4-linear) removed 2026-09-19:
+# identical to E3-linear on a linear grid (139/139 points, max|diff|=0) --
+# see ptdb_10ms_wl32ms_plan.md.
+- name: ptdb_10ms_clean_mel_upper_bins_fs4_256bs8
+  dataset: ptdb
+  datatype: clean
+  sample_rate: 8000
+  train_splits: [train]
+  valid_splits: [valid]
+  f_max: fs/4
+  window_length: 256
+  n_bins: 256
+  bin_method: mel_aligned_upper_bins_truncated
+  clean_only: true
+  use_cache: true

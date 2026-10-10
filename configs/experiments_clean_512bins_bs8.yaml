@@ -1,0 +1,307 @@
+# Optimized RRCGD-RMVPE — PTDB 10-ms frequency-range experiment grid
+#
+# Four frequency representations:
+#
+#   E1: Full representation up to fs/2
+#   E2: Full representation up to fs/4
+#   E3: Upper-frequency truncation at fs/4
+#   E4: Upper-bin truncation at fs/4
+#
+# Each representation is evaluated with:
+#   - linear bins
+#   - Mel-aligned bins
+#
+# Existing training/evaluation protocol is unchanged.
+# The same roots/cache are reused; RRCGD frequency representation is
+# generated at model time.
+#
+# For truncation experiments:
+#   f_max = fs/4 specifies the cutoff.
+#
+# run_experiments.py resolves:
+#   fs/2 -> sample_rate / 2
+#   fs/4 -> sample_rate / 4
+
+defaults:
+  learning_rate:   1e-3
+  batch_size:      32
+  seq_l:           2.55
+  hop_length:      10
+  clip_grad_norm:  3
+  gamma:           0
+  pitch_th:        0.5
+  sample_rate:     8000
+  n_bins: 512
+  use_cache:       true
+
+  # Reproducibility. seed fixes model init, shuffling and worker RNGs.
+  # deterministic:true additionally pins cuDNN/cuBLAS to deterministic
+  # kernels for bit-exact repeat runs — costs speed (cuDNN can no longer
+  # autotune), never accuracy. Set false for faster sweeps where you don't
+  # need a run to be bit-reproducible.
+  seed:            42
+  deterministic:   true
+
+  # Auto-evaluate the best checkpoint on the PTDB test split right after
+  # its training job finishes -- writes test_eval.csv into the same run
+  # dir. Set false per-experiment to skip (e.g. non-ptdb datasets).
+  eval_test:       true
+
+  alpha_list: [9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5,15,15.5,16,16.5,17,17.5,18,18.5,19,19.5,20]
+
+
+data_paths:
+  ptdb: "dataset/PTDB_data_10ms_hop"
+
+
+experiments:
+
+  # ================================================================
+  # E1 — FULL REPRESENTATION: fs/2
+  # ================================================================
+
+  - name: "ptdb_10ms_clean_linear_fs2"
+    dataset: "ptdb"
+    datatype: "clean"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/2"
+    window_length: 256
+    n_bins: 512
+    bin_method: "linear_fmax"
+    clean_only: true
+    use_cache: true
+    # Uses defaults alpha_list (matches E2/E3/E4's full 9-20 sweep)
+
+
+  - name: "ptdb_10ms_clean_noisy_linear_fs2"
+    dataset: "ptdb"
+    datatype: "clean_noisy"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/2"
+    window_length: 256
+    n_bins: 512
+    bin_method: "linear_fmax"
+    clean_only: false
+    use_cache: true
+
+
+  - name: "ptdb_10ms_clean_mel_fs2"
+    dataset: "ptdb"
+    datatype: "clean"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/2"
+    window_length: 256
+    n_bins: 512
+    bin_method: "mel_aligned"
+    clean_only: true
+    use_cache: true
+    # Uses defaults alpha_list (matches E2/E3/E4's full 9-20 sweep)
+
+
+  - name: "ptdb_10ms_clean_noisy_mel_fs2"
+    dataset: "ptdb"
+    datatype: "clean_noisy"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/2"
+    window_length: 256
+    n_bins: 512
+    bin_method: "mel_aligned"
+    clean_only: false
+    use_cache: true
+
+
+  # ================================================================
+  # E2 — FULL REPRESENTATION: fs/4
+  #
+  # Generate the complete representation directly over:
+  #       0 -> fs/4
+  #
+  # This is the baseline for the reduced-frequency range.
+  # ================================================================
+
+  - name: "ptdb_10ms_clean_linear_fs4"
+    dataset: "ptdb"
+    datatype: "clean"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/4"
+    window_length: 256
+    n_bins: 512
+    bin_method: "linear_fmax"
+    clean_only: true
+    use_cache: true
+    # Uses defaults alpha_list (matches E1/E3/E4's full 9-20 sweep)
+
+
+  - name: "ptdb_10ms_clean_noisy_linear_fs4"
+    dataset: "ptdb"
+    datatype: "clean_noisy"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/4"
+    window_length: 256
+    n_bins: 512
+    bin_method: "linear_fmax"
+    clean_only: false
+    use_cache: true
+
+
+  - name: "ptdb_10ms_clean_mel_fs4"
+    dataset: "ptdb"
+    datatype: "clean"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/4"
+    window_length: 256
+    n_bins: 512
+    bin_method: "mel_aligned"
+    clean_only: true
+    use_cache: true
+    # Uses defaults alpha_list (matches E1/E3/E4's full 9-20 sweep)
+
+
+  - name: "ptdb_10ms_clean_noisy_mel_fs4"
+    dataset: "ptdb"
+    datatype: "clean_noisy"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/4"
+    window_length: 256
+    n_bins: 512
+    bin_method: "mel_aligned"
+    clean_only: false
+    use_cache: true
+
+
+  # ================================================================
+  # E3 — UPPER-FREQUENCY TRUNCATION: cutoff = fs/4
+  #
+  # IMPORTANT:
+  # The source frequency grid is still:
+  #
+  #       0 -> fs/2
+  #
+  # Then bins whose center frequency is > fs/4 are discarded.
+  #
+  # This is NOT the same representation as E2.
+  # ================================================================
+
+  - name: "ptdb_10ms_clean_linear_upper_frequency_fs4"
+    dataset: "ptdb"
+    datatype: "clean"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/4"
+    window_length: 256
+    n_bins: 512
+    bin_method: "linear_fmax_upper_frequency_truncated"
+    clean_only: true
+    use_cache: true
+    # alpha_list: [16,16.5,17,17.5,18,18.5,19,19.5,20]
+
+
+  - name: "ptdb_10ms_clean_noisy_linear_upper_frequency_fs4"
+    dataset: "ptdb"
+    datatype: "clean_noisy"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/4"
+    window_length: 256
+    n_bins: 512
+    bin_method: "linear_fmax_upper_frequency_truncated"
+    clean_only: false
+    use_cache: true
+
+
+  - name: "ptdb_10ms_clean_mel_upper_frequency_fs4"
+    dataset: "ptdb"
+    datatype: "clean"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/4"
+    window_length: 256
+    n_bins: 512
+    bin_method: "mel_aligned_upper_frequency_truncated"
+    clean_only: true
+    use_cache: true
+    # alpha_list: [16,16.5,17,17.5,18,18.5,19,19.5,20]
+
+
+  - name: "ptdb_10ms_clean_noisy_mel_upper_frequency_fs4"
+    dataset: "ptdb"
+    datatype: "clean_noisy"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/4"
+    window_length: 256
+    n_bins: 512
+    bin_method: "mel_aligned_upper_frequency_truncated"
+    clean_only: false
+    use_cache: true
+
+
+  # ================================================================
+  # E4 — UPPER-BIN TRUNCATION: cutoff = fs/4
+  #
+  # Source grid:
+  #
+  #       0 -> fs/2
+  #
+  # Then retain the lower half of the ORIGINAL bins.
+  #
+  # Selection is by BIN INDEX, not by physical frequency.
+  # f_max identifies the fs/4 experiment/cutoff.
+  # ================================================================
+
+  # ptdb_10ms_clean_linear_upper_bins_fs4 / ..._noisy_... (E4-linear) removed
+  # 2026-09-19: on a LINEAR grid, "keep bins with center frequency <= fs/4"
+  # (E3, above) and "keep the first half of bins by index" (E4, here) select
+  # the exact same bin set -- verified byte-identical against E3-linear's
+  # data (139/139 paired (config,alpha) points, max|diff|=0.000000). Not
+  # true for mel-aligned grids (E4-mel, below, is genuinely different and
+  # stays). See ptdb_10ms_wl32ms_plan.md for the full analysis.
+
+
+  - name: "ptdb_10ms_clean_mel_upper_bins_fs4"
+    dataset: "ptdb"
+    datatype: "clean"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/4"
+    window_length: 256
+    n_bins: 512
+    bin_method: "mel_aligned_upper_bins_truncated"
+    clean_only: true
+    use_cache: true
+    # alpha_list: [16,16.5,17,17.5,18,18.5,19,19.5,20]
+
+
+  - name: "ptdb_10ms_clean_noisy_mel_upper_bins_fs4"
+    dataset: "ptdb"
+    datatype: "clean_noisy"
+    sample_rate: 8000
+    train_splits: ["train"]
+    valid_splits: ["valid"]
+    f_max: "fs/4"
+    window_length: 256
+    n_bins: 512
+    bin_method: "mel_aligned_upper_bins_truncated"
+    clean_only: false
+    use_cache: true
