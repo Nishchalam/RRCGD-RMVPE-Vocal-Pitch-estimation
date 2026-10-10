@@ -62,6 +62,14 @@ PATIENCE_EPOCHS = int(os.environ.get("EXP_PATIENCE_EPOCHS", "4"))
 # they'd otherwise collide on the same run dir. Default 1 (untagged) so
 # every existing invocation is unaffected.
 REPEAT        = int(os.environ.get("EXP_REPEAT", "1"))
+# Auto-resume from this run's own last checkpoint (model + optimizer +
+# scheduler + scaler + best-tracking state, all saved together -- see
+# the "New best model saved" block below) if one exists in logdir.
+# Default "1" so a killed/crashed job picks back up instead of
+# restarting from iteration 0 the next time the same command runs.
+# Set EXP_RESUME=0 to force a from-scratch run even if a checkpoint
+# is present (e.g. deliberately re-running a finished experiment).
+RESUME        = os.environ.get("EXP_RESUME", "1") == "1"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # src imports come AFTER env vars are set so constants.py reads EXP_SAMPLE_RATE
@@ -267,11 +275,45 @@ def train():
     scheduler = StepLR(optimizer, step_size=learning_rate_decay_steps, gamma=0.98)
     scaler    = GradScaler(enabled=use_amp)
 
-    # ── Training loop ─────────────────────────────────────────────────────────
-    loop = tqdm(range(1, iterations + 1))
-    loop.set_description(f"{method_tag} {fmax_tag} | {loss_tag}")
-
+    # ── Resume from this run's own last checkpoint, if any ──────────────────
     RPA, RCA, OA, VFA, VR, it = 0, 0, 0, 0, 0, 0
+    start_i = 1
+    ckpts = sorted(
+        [f for f in os.listdir(logdir)
+         if f.startswith("model-1-") and f.endswith(".pt")],
+        key=lambda x: int(x.split("-")[-1].split(".")[0]),
+    )
+    if RESUME and ckpts:
+        last_i = int(ckpts[-1].split("-")[-1].split(".")[0])
+        state_path = os.path.join(logdir, f"train-state-{last_i}.pt")
+        model_path = os.path.join(logdir, ckpts[-1])
+        if os.path.isfile(state_path):
+            loaded_model = torch.load(model_path, map_location=device, weights_only=False)
+            model.module.load_state_dict(loaded_model.state_dict())
+            state = torch.load(state_path, map_location=device)
+            optimizer.load_state_dict(state["optimizer"])
+            scheduler.load_state_dict(state["scheduler"])
+            scaler.load_state_dict(state["scaler"])
+            RPA, RCA, OA, VFA, VR, it = (
+                state["RPA"], state["RCA"], state["OA"],
+                state["VFA"], state["VR"], state["it"],
+            )
+            start_i = state["i"] + 1
+            print(f"Resuming from iter {state['i']} "
+                  f"(best RPA={RPA:.4f} @ iter {it}) -> starting at iter {start_i}")
+        else:
+            print(f"[warn] found {model_path} but no matching {state_path} -- "
+                  f"cannot resume optimizer state, starting from iteration 0")
+
+    if start_i > iterations:
+        print(f"\nAlready at iteration {start_i - 1} >= target {iterations}; nothing to do.")
+        writer.close()
+        print(f"\nFinished: {logdir}  |  best RPA = {RPA:.4f} @ iter {it}\n")
+        return
+
+    # ── Training loop ─────────────────────────────────────────────────────────
+    loop = tqdm(range(start_i, iterations + 1), initial=start_i - 1, total=iterations)
+    loop.set_description(f"{method_tag} {fmax_tag} | {loss_tag}")
 
     for i, data in zip(loop, cycle(data_loader)):
         roots       = data["roots"].to(device, non_blocking=True)
@@ -361,19 +403,37 @@ def train():
                         model.module,
                         os.path.join(logdir, f"model-1-{i}.pt"),
                     )
-                    # torch.save(
-                    #     optimizer.state_dict(),
-                    #     os.path.join(logdir, "last-optimizer-state.pt"),
-                    # )
-                    print("✓ New best model saved")
+                    # Everything needed to resume training bit-for-bit from
+                    # here: optimizer/scheduler/scaler state plus the
+                    # best-tracking vars and the exact iteration, so a
+                    # killed/crashed run picks back up instead of restarting
+                    # (see the resume block above train_single's loop).
+                    torch.save(
+                        {
+                            "optimizer": optimizer.state_dict(),
+                            "scheduler": scheduler.state_dict(),
+                            "scaler": scaler.state_dict(),
+                            "RPA": RPA, "RCA": RCA, "OA": OA,
+                            "VFA": VFA, "VR": VR, "it": it, "i": i,
+                        },
+                        os.path.join(logdir, f"train-state-{i}.pt"),
+                    )
+                    print("✓ New best model + training state saved")
 
                     ckpts = sorted(
                         [f for f in os.listdir(logdir)
                          if f.startswith("model-1-") and f.endswith(".pt")],
                         key=lambda x: int(x.split("-")[-1].split(".")[0]),
                     )
+                    states = sorted(
+                        [f for f in os.listdir(logdir)
+                         if f.startswith("train-state-") and f.endswith(".pt")],
+                        key=lambda x: int(x.split("-")[-1].split(".")[0]),
+                    )
                     for ckpt in ckpts[:-1]:
                         os.remove(os.path.join(logdir, ckpt))
+                    for st in states[:-1]:
+                        os.remove(os.path.join(logdir, st))
 
             model.train()
 

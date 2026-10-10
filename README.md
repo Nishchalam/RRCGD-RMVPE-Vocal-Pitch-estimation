@@ -127,6 +127,7 @@ data_pipeline/                # steps 1-4: raw audio -> trained-model-ready data
   2_split/                       # speaker-disjoint train/valid/test split
   3_augment/                     # SNR-augmented noisy data (for clean+noisy training)
   4_roots_matlab/                 # polynomial root extraction (MATLAB, Lindsey-Fox toolbox)
+for_nerds/                     # auto GPU-detecting scheduler for an unattended sweep (see for_nerds/README.md)
 run_experiments.py           # orchestrates one run per (experiment, alpha) in a config
 train_single.py               # single training run; reads EXP_* env vars run_experiments.py sets
 evaluate.py                   # generic evaluation entry point

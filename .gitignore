@@ -36,6 +36,7 @@ events.out.tfevents*
 *.log
 *_logs/
 env_report_*.json
+for_nerds/logs/
 
 ###########################################################
 # IDE / OS

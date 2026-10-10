@@ -164,7 +164,31 @@ python3 compile_best_results.py      # best alpha per technique
 python3 compile_results_by_condition.py   # per-SNR-condition RPA breakdown (clean+noisy runs only)
 ```
 
-## 7. Known gotchas (learned the hard way)
+## 7. Resuming a killed/crashed run
+
+Every time a new best checkpoint is saved, `train_single.py` also
+saves a matching `train-state-<iter>.pt` alongside `model-1-<iter>.pt`
+holding the optimizer, LR scheduler, and AMP scaler state, plus the
+best-tracking metrics and exact iteration — everything needed to
+continue training bit-for-bit rather than restart from iteration 0.
+
+This is automatic: `EXP_RESUME=1` by default, so simply re-running the
+same `run_experiments.py`/`train_single.py` command against a logdir
+that already has a checkpoint resumes it. Set `EXP_RESUME=0` to force
+a from-scratch restart instead (e.g. deliberately re-running a
+finished experiment).
+
+Note this interacts with `run_experiments.py --skip-existing`: that
+flag skips **launching** an experiment at all once any checkpoint
+exists for it (see its own comments for why — there's no reliable way
+to distinguish "finished early via early-stopping" from "killed
+mid-run" from the checkpoint alone). If you know a specific run was
+killed mid-training and want it to actually resume and keep training,
+invoke `train_single.py` directly (or `run_experiments.py` without
+`--skip-existing` for just that one `--only` experiment) rather than
+relying on `--skip-existing` to notice.
+
+## 8. Known gotchas (learned the hard way)
 
 - **GPU memory headroom from a single `nvidia-smi` snapshot is
   unreliable** when multiple jobs share a card — a snapshot showing
