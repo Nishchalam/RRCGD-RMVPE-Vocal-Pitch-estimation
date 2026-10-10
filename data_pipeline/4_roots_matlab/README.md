@@ -17,7 +17,9 @@ This directory bundles the Lindsey-Fox toolbox and Zhonggang Zeng's
 released for research exchange only" — verify the licensing terms of
 each bundled component yourself before any non-research use. This code
 is included for reproducibility of the root-extraction step; it is not
-original work of this project.
+original work of this project, and **it is explicitly excluded from
+the repository's MIT [LICENSE](../../LICENSE)** — it retains whatever
+terms its own authors gave it.
 
 ## Layout
 

@@ -168,6 +168,11 @@ configs/
 
 ## License
 
-No license file is included yet — all rights reserved by default until
-one is added. Add a `LICENSE` file before relying on this repo being
-reusable by others.
+MIT — see [LICENSE](LICENSE). This covers the project's own code
+(training/eval pipeline, `src/`, `configs/`,
+`data_pipeline/1_download/`–`3_augment/`, `for_nerds/`). The bundled
+third-party MATLAB toolbox under
+[`data_pipeline/4_roots_matlab/`](data_pipeline/4_roots_matlab/)
+(Lindsey-Fox root finder, multroot) is **not** covered — it retains
+its own original terms; see that folder's README for the specifics
+before any non-research use.
